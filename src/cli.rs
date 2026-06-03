@@ -36,7 +36,7 @@ Command Groups:
   Commit And Branching    commit, branch, switch, checkout, tag, merge, rebase, reset, cherry-pick, revert
   Remote And Cloud        remote, fetch, pull, push, open, cloud, publish
   AI And Automation       code, code-control, automation, usage, graph, sandbox, agent, package
-  Maintenance And Plumbing db, fsck, cat-file, hash-object, verify-pack, rev-parse, rev-list, symbolic-ref, reflog, bisect
+  Maintenance And Plumbing db, fsck, cat-file, hash-object, verify-pack, stats, rev-parse, rev-list, symbolic-ref, reflog, bisect
 
 Help Topics:
   error-codes  Print the stable CLI error code table (`libra help error-codes`)
@@ -350,6 +350,8 @@ enum Commands {
     HashObject(command::hash_object::HashObjectArgs),
     #[command(about = "Validate pack index files against pack archives")]
     VerifyPack(command::verify_pack::VerifyPackArgs),
+    #[command(about = "Count file extensions in the current working directory")]
+    Stats(command::stats::StatsArgs),
 
     #[command(about = "Record changes to the repository", alias = "ci")]
     Commit(command::commit::CommitArgs),
@@ -866,6 +868,7 @@ fn command_preflight(command: &Commands) -> CliResult<CommandPreflight> {
         Commands::Init(_)
         | Commands::Clone(_)
         | Commands::Open(_)
+        | Commands::Stats(_)
         | Commands::CodeControl(_)
         | Commands::LsRemote(_)
         | Commands::Sandbox(_) => Ok(CommandPreflight::none()),
@@ -1194,6 +1197,7 @@ pub async fn parse_async(args: Option<&[&str]>) -> CliResult<()> {
         Commands::Remote(cmd) => command::remote::execute_safe(cmd, &output).await?,
         Commands::Package(cmd) => command::package::execute_safe(cmd, &output).await?,
         Commands::Open(cmd_args) => command::open::execute_safe(cmd_args, &output).await?,
+        Commands::Stats(cmd_args) => command::stats::execute_safe(cmd_args, &output).await?,
         Commands::Pull(cmd_args) => command::pull::execute_safe(cmd_args, &output).await?,
         Commands::Config(cmd_args) => command::config::execute_safe(cmd_args, &output).await?,
         Commands::Db(cmd_args) => command::db::execute_safe(cmd_args, &output).await?,
