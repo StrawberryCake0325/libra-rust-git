@@ -53,7 +53,7 @@ fn run_stats() -> CliResult<StatsOutput> {
     Ok(StatsOutput { extensions: ext_map })
 }
 
-fn render_stats_output(output: &StatsOutput, writer: &mut impl std::io::Write) -> CliResult<()> {
+fn render_stats_output(output: &StatsOutput, writer: &mut impl std::io::Write) -> std::io::Result<()> {
     for (ext, count) in &output.extensions {
         writeln!(writer, "{:<20} {}", ext, count)?;
     }
@@ -67,7 +67,8 @@ pub async fn execute_safe(_args: StatsArgs, output: &OutputConfig) -> CliResult<
         emit_json_data("stats", &stats, output)?;
     } else if !output.quiet {
         let mut stdout = std::io::stdout();
-        render_stats_output(&stats, &mut stdout)?;
+        render_stats_output(&stats, &mut stdout)
+            .map_err(|e| crate::utils::error::CliError::io(format!("failed to render stats: {e}")))?;
     }
 
     Ok(())
